@@ -74,24 +74,7 @@ main {
     box-shadow: 0 0 10px rgba(225, 190, 231, 0.5), 0 0 20px rgba(171, 71, 188, 0.4) inset;
 }
 
-#charge-bar-container {
-    width: 60%;
-    max-width: 300px;
-    height: 20px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 1px solid #ab47bc;
-    border-radius: 10px;
-    margin: 15px auto;
-    overflow: hidden;
-}
-
-#charge-bar {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, #da70d6, #9932cc); /* Orchid to DarkOrchid gradient */
-    border-radius: 8px;
-    /* transition is handled by JS for more control */
-}
+/* Removed #charge-bar-container and #charge-bar styles */
 
 .instructions {
     font-size: 0.9em;

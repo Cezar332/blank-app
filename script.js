@@ -6,9 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardMeaningEl = document.getElementById('card-meaning');
     const cardInterpretationSection = document.getElementById('card-interpretation');
 
-    let holdStartTime;
-    let holdTimer;
-    const MAX_HOLD_DURATION = 3000; // Max hold duration in milliseconds (e.g., 3 seconds)
+    // Removed: holdStartTime, holdTimer, MAX_HOLD_DURATION
 
     // Tarot card data
     const tarotDeck = [
@@ -106,12 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Conceptually, this draws inspiration from quantum uncertainty, where initial conditions
     // can drastically alter outcomes, making them hard to predict. It's not true quantum randomness,
     // but rather a thematically enhanced pseudo-randomness.
-    function getQuantumRandomNumber(max, holdDuration = 0) { // Added holdDuration parameter
+    function getQuantumRandomNumber(max) { // holdDuration parameter removed
         const timestamp = Date.now(); // Get current time in milliseconds
         const userAgent = navigator.userAgent || "unknown"; // Get browser user agent
 
-        // Create a string from various sources of entropy, now including holdDuration
-        let seedString = `${timestamp}-${Math.random()}-${userAgent}-${performance.now()}-${holdDuration}`;
+        // Create a string from various sources of entropy
+        let seedString = `${timestamp}-${Math.random()}-${userAgent}-${performance.now()}`;
 
         // Simple hash function: sum of character codes
         let hash = 0;
@@ -121,12 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Use the hash to further influence Math.random()
-        const pseudoQuantumRandom = Math.abs(hash * Math.random() + Math.random() + (holdDuration / 1000)); // Incorporate holdDuration effect
+        const pseudoQuantumRandom = Math.abs(hash * Math.random() + Math.random());
 
         return Math.floor(pseudoQuantumRandom % max);
     }
 
-    function drawCard(holdDuration) { // Added holdDuration parameter
+    function drawCard() { // holdDuration parameter removed
         if (tarotDeck.length === 0) {
             cardDisplay.innerHTML = "<p>No cards left in the deck!</p>";
             cardNameEl.textContent = "";
@@ -170,65 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
         cardMeaningEl.textContent = "";
     }
 
-
-    focusRevealBtn.addEventListener('mousedown', () => {
-        resetCardDisplay(); // Reset card before starting new focus
-        holdStartTime = Date.now();
-        chargeBar.style.width = '0%'; // Reset charge bar
-        chargeBar.style.transition = 'none'; // Remove transition for immediate reset if re-clicked quickly
-
-        // Animate charge bar
-        // Using a timeout to ensure the transition property is applied after 'none' has been processed.
-        setTimeout(() => {
-            chargeBar.style.transition = `width ${MAX_HOLD_DURATION / 1000}s linear`;
-            chargeBar.style.width = '100%';
-        }, 20); // A small delay like 20ms is usually enough
-
-        // Optional: Clear any existing timer if button is spammed
-        if (holdTimer) clearInterval(holdTimer);
-        // This timer is just for visual, actual duration is calculated on mouseup
-        // holdTimer = setInterval(() => {
-        //     const elapsedTime = Date.now() - holdStartTime;
-        //     const percentage = Math.min((elapsedTime / MAX_HOLD_DURATION) * 100, 100);
-        //     chargeBar.style.width = `${percentage}%`;
-        // }, 50); // Update interval for smoothness
+    focusRevealBtn.addEventListener('click', () => {
+        resetCardDisplay();
+        drawCard();
     });
-
-    focusRevealBtn.addEventListener('mouseup', () => {
-        // if (holdTimer) clearInterval(holdTimer);
-        const holdDuration = Math.min(Date.now() - holdStartTime, MAX_HOLD_DURATION);
-
-        // Reset charge bar visually (can be made smoother)
-        chargeBar.style.transition = 'width 0.1s linear'; // Quick reset transition
-        chargeBar.style.width = '0%';
-
-        // Prevent drawing if click was too short (optional, e.g. less than 100ms)
-        if (holdDuration < 100 && holdStartTime) { // Check holdStartTime to ensure it was a mousedown on this button
-            // Optionally provide feedback that the hold was too short
-            // For now, just don't draw.
-            console.log("Hold was too short. Please hold longer to focus.");
-            // Card display is already reset by resetCardDisplay() at mousedown
-            holdStartTime = null; // Reset startTime
-            return;
-        }
-
-        if(holdStartTime) { // Ensure mousedown happened on the button
-             drawCard(holdDuration);
-        }
-        holdStartTime = null; // Reset startTime after drawing or discarding short click
-    });
-
-    // Ensure the card is reset if the mouse leaves the button while pressed.
-    focusRevealBtn.addEventListener('mouseleave', () => {
-        if (holdStartTime) { // If was holding
-            // To prevent accidental draw if mouse slips off, we can treat it like a short click or reset.
-            // For now, let's treat it as if mouseup occurred at MAX_HOLD_DURATION or current duration.
-            // Or, more simply, trigger a mouseup.
-            focusRevealBtn.dispatchEvent(new MouseEvent('mouseup'));
-        }
-    });
-
 
     // Initial state: hide interpretation section until a card is drawn
-    cardInterpretationSection.style.display = 'none';
+    // Ensure card is also in its "back" state initially by calling reset.
+    resetCardDisplay();
+    // cardInterpretationSection.style.display = 'none'; // This is handled by resetCardDisplay
 });
