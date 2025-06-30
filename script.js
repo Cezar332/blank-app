@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const drawCardBtn = document.getElementById('draw-card-btn');
+    const focusRevealBtn = document.getElementById('focus-reveal-btn');
+    const chargeBar = document.getElementById('charge-bar');
     const cardDisplay = document.getElementById('card-display');
     const cardNameEl = document.getElementById('card-name');
     const cardMeaningEl = document.getElementById('card-meaning');
     const cardInterpretationSection = document.getElementById('card-interpretation');
+
+    let holdStartTime;
+    let holdTimer;
+    const MAX_HOLD_DURATION = 3000; // Max hold duration in milliseconds (e.g., 3 seconds)
 
     // Tarot card data
     const tarotDeck = [
@@ -101,12 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Conceptually, this draws inspiration from quantum uncertainty, where initial conditions
     // can drastically alter outcomes, making them hard to predict. It's not true quantum randomness,
     // but rather a thematically enhanced pseudo-randomness.
-    function getQuantumRandomNumber(max) {
+    function getQuantumRandomNumber(max, holdDuration = 0) { // Added holdDuration parameter
         const timestamp = Date.now(); // Get current time in milliseconds
         const userAgent = navigator.userAgent || "unknown"; // Get browser user agent
 
-        // Create a string from various sources of entropy
-        let seedString = `${timestamp}-${Math.random()}-${userAgent}-${performance.now()}`;
+        // Create a string from various sources of entropy, now including holdDuration
+        let seedString = `${timestamp}-${Math.random()}-${userAgent}-${performance.now()}-${holdDuration}`;
 
         // Simple hash function: sum of character codes
         let hash = 0;
@@ -116,14 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Use the hash to further influence Math.random()
-        // Combine Math.random with the hash to make it more "chaotic"
-        // The idea is to make the sequence less trivially predictable.
-        const pseudoQuantumRandom = Math.abs(hash * Math.random() + Math.random());
+        const pseudoQuantumRandom = Math.abs(hash * Math.random() + Math.random() + (holdDuration / 1000)); // Incorporate holdDuration effect
 
         return Math.floor(pseudoQuantumRandom % max);
     }
 
-    function drawCard() {
+    function drawCard(holdDuration) { // Added holdDuration parameter
         if (tarotDeck.length === 0) {
             cardDisplay.innerHTML = "<p>No cards left in the deck!</p>";
             cardNameEl.textContent = "";
@@ -131,49 +134,100 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const cardIndex = getQuantumRandomNumber(tarotDeck.length);
+        const cardIndex = getQuantumRandomNumber(tarotDeck.length, holdDuration);
         const selectedCard = tarotDeck[cardIndex];
 
-        // Display card image
-        const cardImage = document.createElement('img');
-        cardImage.src = selectedCard.img;
-        cardImage.alt = selectedCard.name;
-        cardImage.classList.add('tarot-card-image'); // Defined in style.css
+        // Display card (name and meaning for now, visual flip/reveal to be handled by CSS/JS later)
+        // --- New Card Display Logic with Flip Animation ---
+        const cardEntity = cardDisplay.querySelector('.card-entity');
+        const cardFront = cardEntity.querySelector('.card-front');
+        // const cardBack = cardEntity.querySelector('.card-back'); // For potential direct manipulation
 
-        // If image fails to load, show a text placeholder inside the card display area
-        cardImage.onerror = () => {
-            cardDisplay.innerHTML = ''; // Clear previous content
-            const errorPlaceholder = document.createElement('div');
-            errorPlaceholder.classList.add('card-placeholder'); // Reuse existing style for placeholder
-            errorPlaceholder.textContent = `${selectedCard.name} (Image not found)`;
-            cardDisplay.appendChild(errorPlaceholder);
-        };
+        // Update content of the card front
+        // Instead of image, we put name directly on the "front" for this version
+        cardFront.innerHTML = `<h3>${selectedCard.name}</h3><p class='image-alt-text'>(Quantum Signature Observed)</p>`;
 
-        cardImage.onload = () => {
-            cardDisplay.innerHTML = ''; // Clear previous content (placeholder or old card)
-            cardDisplay.appendChild(cardImage);
-        };
-
-        // Set src after onload/onerror are defined, in case image loads from cache quickly
-        // cardImage.src = selectedCard.img; // This line is redundant if set above.
-
-        // Fallback for initial display before image loads or if there's an issue setting up onload/onerror
-        // This ensures something is shown immediately.
-        if (!cardImage.complete || cardImage.naturalHeight === 0) { // Check if image is already loaded or broken
-            cardDisplay.innerHTML = ''; // Clear previous content
-            const initialPlaceholder = document.createElement('div');
-            initialPlaceholder.classList.add('card-placeholder');
-            initialPlaceholder.textContent = `Loading ${selectedCard.name}...`;
-            cardDisplay.appendChild(initialPlaceholder);
+        // Flip the card
+        if (cardEntity) {
+            cardEntity.classList.add('is-flipped');
         }
-
+        // --- End New Card Display Logic ---
 
         cardNameEl.textContent = selectedCard.name;
         cardMeaningEl.textContent = selectedCard.meaning;
         cardInterpretationSection.style.display = 'block'; // Show interpretation
     }
 
-    drawCardBtn.addEventListener('click', drawCard);
+    function resetCardDisplay() {
+        const cardEntity = cardDisplay.querySelector('.card-entity');
+        if (cardEntity) {
+            cardEntity.classList.remove('is-flipped');
+        }
+        // Restore placeholder text if needed, or ensure card-back is visible
+        // For now, just flipping back is enough, card-back content is static
+        cardInterpretationSection.style.display = 'none';
+        cardNameEl.textContent = "";
+        cardMeaningEl.textContent = "";
+    }
+
+
+    focusRevealBtn.addEventListener('mousedown', () => {
+        resetCardDisplay(); // Reset card before starting new focus
+        holdStartTime = Date.now();
+        chargeBar.style.width = '0%'; // Reset charge bar
+        chargeBar.style.transition = 'none'; // Remove transition for immediate reset if re-clicked quickly
+
+        // Animate charge bar
+        // Using a timeout to ensure the transition property is applied after 'none' has been processed.
+        setTimeout(() => {
+            chargeBar.style.transition = `width ${MAX_HOLD_DURATION / 1000}s linear`;
+            chargeBar.style.width = '100%';
+        }, 20); // A small delay like 20ms is usually enough
+
+        // Optional: Clear any existing timer if button is spammed
+        if (holdTimer) clearInterval(holdTimer);
+        // This timer is just for visual, actual duration is calculated on mouseup
+        // holdTimer = setInterval(() => {
+        //     const elapsedTime = Date.now() - holdStartTime;
+        //     const percentage = Math.min((elapsedTime / MAX_HOLD_DURATION) * 100, 100);
+        //     chargeBar.style.width = `${percentage}%`;
+        // }, 50); // Update interval for smoothness
+    });
+
+    focusRevealBtn.addEventListener('mouseup', () => {
+        // if (holdTimer) clearInterval(holdTimer);
+        const holdDuration = Math.min(Date.now() - holdStartTime, MAX_HOLD_DURATION);
+
+        // Reset charge bar visually (can be made smoother)
+        chargeBar.style.transition = 'width 0.1s linear'; // Quick reset transition
+        chargeBar.style.width = '0%';
+
+        // Prevent drawing if click was too short (optional, e.g. less than 100ms)
+        if (holdDuration < 100 && holdStartTime) { // Check holdStartTime to ensure it was a mousedown on this button
+            // Optionally provide feedback that the hold was too short
+            // For now, just don't draw.
+            console.log("Hold was too short. Please hold longer to focus.");
+            // Card display is already reset by resetCardDisplay() at mousedown
+            holdStartTime = null; // Reset startTime
+            return;
+        }
+
+        if(holdStartTime) { // Ensure mousedown happened on the button
+             drawCard(holdDuration);
+        }
+        holdStartTime = null; // Reset startTime after drawing or discarding short click
+    });
+
+    // Ensure the card is reset if the mouse leaves the button while pressed.
+    focusRevealBtn.addEventListener('mouseleave', () => {
+        if (holdStartTime) { // If was holding
+            // To prevent accidental draw if mouse slips off, we can treat it like a short click or reset.
+            // For now, let's treat it as if mouseup occurred at MAX_HOLD_DURATION or current duration.
+            // Or, more simply, trigger a mouseup.
+            focusRevealBtn.dispatchEvent(new MouseEvent('mouseup'));
+        }
+    });
+
 
     // Initial state: hide interpretation section until a card is drawn
     cardInterpretationSection.style.display = 'none';

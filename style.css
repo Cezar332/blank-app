@@ -46,51 +46,139 @@ main {
     margin-bottom: 2em;
 }
 
-#draw-card-btn {
-    background-color: #8a2be2; /* Blue violet */
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.2em;
-    font-family: 'Cinzel', serif;
+#focus-reveal-btn {
+    background: linear-gradient(145deg, #7b1fa2, #4a148c); /* Deep purple gradient */
+    color: #e1bee7; /* Light lavender text */
+    border: 2px solid #ab47bc; /* Purple border */
+    padding: 18px 35px;
+    font-size: 1.3em;
+    font-family: 'Orbitron', sans-serif; /* Futuristic font */
     cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(225, 190, 231, 0.4), 0 0 25px rgba(171, 71, 188, 0.3) inset;
+    outline: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-#draw-card-btn:hover {
-    background-color: #4b0082; /* Indigo */
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+#focus-reveal-btn:hover {
+    background: linear-gradient(145deg, #8e24aa, #5e35b1);
+    box-shadow: 0 0 20px rgba(225, 190, 231, 0.7), 0 0 30px rgba(171, 71, 188, 0.5) inset;
+    color: #fff;
+    border-color: #ce93d8;
 }
+
+#focus-reveal-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 10px rgba(225, 190, 231, 0.5), 0 0 20px rgba(171, 71, 188, 0.4) inset;
+}
+
+#charge-bar-container {
+    width: 60%;
+    max-width: 300px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #ab47bc;
+    border-radius: 10px;
+    margin: 15px auto;
+    overflow: hidden;
+}
+
+#charge-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #da70d6, #9932cc); /* Orchid to DarkOrchid gradient */
+    border-radius: 8px;
+    /* transition is handled by JS for more control */
+}
+
+.instructions {
+    font-size: 0.9em;
+    color: #ce93d8; /* Light purple text */
+    margin-top: 10px;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
 
 #card-display {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 2em;
-    min-height: 300px; /* Placeholder for card image */
+    min-height: 320px; /* Adjusted for card + potential effects */
+    perspective: 1000px; /* For 3D flip effect */
 }
 
-.card-placeholder {
+.card-entity { /* New wrapper for card content for flip */
+    width: 220px; /* Slightly larger for visual presence */
+    height: 320px;
+    position: relative;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden; /* Hides the back of the face during flip */
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.card-back {
+    background: linear-gradient(135deg, #2c0b4d, #1a0c3a); /* Deep space purple */
+    border: 2px solid #7b1fa2;
+    box-shadow: 0 0 20px rgba(171, 71, 188, 0.5), 0 0 10px rgba(225,190,231,0.3) inset;
+    color: #e1bee7; /* Light lavender */
+}
+
+.card-back p {
+    font-size: 1.2em;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.card-front { /* This will hold the revealed card name/meaning */
+    background: linear-gradient(135deg, #3d1e6d, #2c0b4d);
+    border: 2px solid #ab47bc;
+    color: #f3e5f5; /* Very light purple */
+    transform: rotateY(180deg); /* Initially flipped */
+    /* Content (name, meaning) will be populated here by JS or styled if static */
+}
+
+.card-entity.is-flipped {
+    transform: rotateY(180deg);
+}
+
+
+/* Styles for the actual card image will be added later if we use images */
+/* For now, we are not using .tarot-card-image directly, but .card-front for content */
+/* .tarot-card-image {
     width: 200px;
     height: 300px;
-    border: 2px dashed #ffd700; /* Gold dashed border */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+} */
+
+.card-placeholder { /* This is the initial placeholder before any interaction */
+    width: 220px;
+    height: 320px;
+    border: 2px dashed #7b1fa2; /* Dashed border for initial state */
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    color: #ffd700;
-    border-radius: 10px;
+    color: #ab47bc; /* Purple text */
+    border-radius: 15px;
     background-color: rgba(0,0,0,0.2);
-}
-
-/* Styles for the actual card image will be added later if we use images */
-.tarot-card-image {
-    width: 200px;
-    height: 300px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7); /* Gold glow for the card */
+    font-family: 'Orbitron', sans-serif;
 }
 
 
@@ -130,5 +218,5 @@ footer {
     margin-top: auto; /* Pushes footer to the bottom */
 }
 
-/* Add Google Font 'Cinzel' */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+/* Add Google Font 'Cinzel', 'Orbitron', 'Roboto Condensed' */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Orbitron:wght@400;700&family=Roboto+Condensed:wght@300;400&display=swap');

@@ -13,12 +13,27 @@
     </header>
     <main>
         <div class="controls">
-            <button id="draw-card-btn">Draw a Card</button>
+            <button id="focus-reveal-btn">Focus and Reveal</button>,
+            <div id="charge-bar-container">
+                <div id="charge-bar"></div>
+            </div>
+            <p class="instructions">Hold the button to focus your intent. The duration of your observation tunes the quantum field, collapsing possibilities to reveal your card.</p>
         </div>
         <div id="card-display">
-            <div class="card-placeholder">
-                <p>Click "Draw a Card" to reveal your fate.</p>
+            <!-- Initial state can be the placeholder, or the card-entity directly -->
+            <!-- Using card-entity directly for the flip effect from the start -->
+            <div class="card-entity">
+                <div class="card-face card-back">
+                    <p>Observe the Quantum Field</p>
+                </div>
+                <div class="card-face card-front">
+                    <!-- Content will be populated by JS: <h3>Card Name</h3><p>(Quantum Signature Observed)</p> -->
+                </div>
             </div>
+            <!-- Fallback if something goes wrong with card-entity or for initial non-JS view -->
+            <!-- <div class="card-placeholder" style="display:none;">
+                <p>Focus your energy to reveal your fate.</p>
+            </div> -->
         </div>
         <div id="card-interpretation">
             <h2>Card Meaning</h2>
